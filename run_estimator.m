@@ -1,3 +1,5 @@
+addpath('position_filters')
+
 rng(42)
 
 X_0 = [1 1 1 1 1 1 1]';
