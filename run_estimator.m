@@ -50,7 +50,7 @@ for i = 1:length(t)
     z_att = map_truth2sensors(X_truth(i,:));
     
     % Run ekf
-    [X_att_est, P_att_est, theta_est] = attitude_EKF(X_att_est, P_att_est, z_att, Q_att, R_att, U_dummy, const);
+    [X_att_est, P_att_est, theta_est] = attitude_EKF_function(X_att_est, P_att_est, z_att, Q_att, R_att, U_dummy, const);
 
     z(3) = theta_est;
 
