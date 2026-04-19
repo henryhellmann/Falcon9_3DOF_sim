@@ -28,6 +28,15 @@ P_est = P_0;
 
 X_est_hist = zeros(length(t), 7);
 P_est_hist = zeros(7, 7, length(t));
+
+% attitude variables initialization
+X_att_est = [0.9962; 0; 0; 0.0872; 0; 0; 0; 30000]; % initial guess for attitude state
+P_att_est = eye(8) * 1e-6; 
+
+% attitude noise matrices
+Q_att = [eye(4)*1e-8, zeros(4,4); zeros(4,4), diag([1e-6 1e-6 1e-6 1e-7])];
+R_att = diag([0.01^2 * ones(1,4), 0.05^2 * ones(1,3), 0.01^2]);
+
 for i = 1:length(t)
     % Dummy sinusoidal control inputs.
     U_dummy.T = abs(U.T * sin(t(i)));
@@ -37,8 +46,13 @@ for i = 1:length(t)
     z_truth = h(X_truth(i,:)');
     z = z_truth + 0.01 * randn(4, 1);
 
-    % TODO Replace z(3) with angle measurement from attitude EKF
-    % z(3) = ...
+    % dummy noisy sensor measurement for attitude ekf
+    z_att = map_truth2sensors(X_truth(i,:));
+    
+    % Run ekf
+    [X_att_est, P_att_est, theta_est] = attitude_EKF(X_att_est, P_att_est, z_att, Q_att, R_att, U_dummy, const);
+
+    z(3) = theta_est;
 
     %[X_est, P_est] = position_EKF(X_est, P_est, z, Q, R, U_dummy, const);
     [X_est, P_est] = position_UKF(X_est, P_est, z, Q, R, U_dummy, const);
@@ -106,4 +120,29 @@ z_meas = [sqrt(x^2 + z^2);
           -atan2(x, z) - theta;
           theta;
           m];
+end
+
+function z_att = map_truth2sensors(X_truth)
+    % extract variables
+    theta_true = X_truth(5);
+    wz_true    = X_truth(6);
+    m_true     = X_truth(7);
+
+    % convert pitch angle to quaternion
+    q0_true = cos(theta_true / 2);
+    q1_true = 0;
+    q2_true = 0;
+    q3_true = sin(theta_true / 2);
+
+    % assemble array for attitude EKF
+    z_att_truth = [q0_true; q1_true; q2_true; q3_true; 0; 0; wz_true; m_true];
+
+    % add noise
+    noise_q = 0.01 * randn(4,1);
+    noise_w = 0.05 * randn(3,1);
+    noise_m = 0.01 * randn(1,1);
+    
+    z_att = z_att_truth + [noise_q; noise_w; noise_m];
+
+    z_att(1:4) = z_att(1:4) / norm(z_att(1:4));
 end
