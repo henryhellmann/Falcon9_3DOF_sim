@@ -14,7 +14,7 @@ Xf = [0; 0; 0; 0; 0; 0];       % Target state
 
 % Discretization
 N = 100;                       
-tf = 12.0;                     
+tf = 10.0;                     
 dt = tf / (N-1);
 
 %% Reference trajectory
