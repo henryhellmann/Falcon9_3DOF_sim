@@ -9,7 +9,7 @@ p.delta_max = deg2rad(5);      % 5 degree gimbal limit
 m0      = 30000;               % Initial mass (kg)
 
 % Initial Conditions: [x, vx, z, vz, theta, omega, m]
-X0 = [500; -50; 1000; -200; deg2rad(10); 0; m0];
+X0 = [500; -50; 1000; -200; deg2rad(10); -0.01; m0];
 Xf = [0; 0; 0; 0; 0; 0];       % Target state 
 
 % Discretization

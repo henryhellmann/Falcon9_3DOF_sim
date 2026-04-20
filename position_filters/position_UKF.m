@@ -8,29 +8,29 @@ tf = 1 / const.sample_rate;
 num_steps = 100;
 t = linspace(0, tf, num_steps);
 
-tol = 1E-12;
-options = odeset('RelTol', tol,'AbsTol', tol);
-[~, X] = ode45(@dynamics, t, X_0, options, U, const);
+% tol = 1E-12;
+% options = odeset('RelTol', tol,'AbsTol', tol);
+% [~, X] = ode45(@dynamics, t, X_0, options, U, const);
 
-X_f = X(end,:)';
-P_f = propagation_unscented_transform(X_0, P_0, Q, U, const);
+% X_f = X(end,:)';
+[X_f, P_f] = propagation_unscented_transform(X_0, P_0, Q, U, const);
 end
 
 function [X_est, P_est] = UKF_update(X_pred, P_pred, R, z)
-z_pred = h(X_pred);
-[Pz, Pxz] = update_unscented_transform(X_pred, P_pred, R);
+[z_pred, Pz, Pxz] = update_unscented_transform(X_pred, P_pred, R);
 
 K = Pxz/Pz;
 
 X_est = X_pred + K*(z - z_pred);
-P_est = P_pred - Pxz*K' - K*Pxz' + K*Pz*K';
+P_est = P_pred - K*Pz*K';
+P_est = (P_est + P_est')/2; % keep symmetry
 end
 
-function P_f = propagation_unscented_transform(X_0, P_0, Q, U, const)
+function [X_f, P_f] = propagation_unscented_transform(X_0, P_0, Q, U, const)
 n = length(X_0);
-alpha = 0.2;
+alpha = 1e-3;
 beta = 2;
-k = 0;
+k = 3-n;
 lambda = alpha^2 * (n + k) - n;
 
 P_0 = (P_0 + P_0')/2;
@@ -119,35 +119,38 @@ X13_f = X13_f(end,:)';
 [~, X14_f] = ode45(@dynamics, t, X14_0, options, U, const);
 X14_f = X14_f(end,:)';
 
-x_f = wm0*X0_f + wm1*X1_f + wm2*X2_f + wm3*X3_f + wm4*X4_f + wm5*X5_f + wm6*X6_f + wm7*X7_f + wm8*X8_f + wm9*X9_f + wm10*X10_f + wm11*X11_f + wm12*X12_f + wm13*X13_f + wm14*X14_f;
+% X_f = wm0*X0_f + wm1*X1_f + wm2*X2_f + wm3*X3_f + wm4*X4_f + wm5*X5_f + wm6*X6_f + wm7*X7_f + wm8*X8_f + wm9*X9_f + wm10*X10_f + wm11*X11_f + wm12*X12_f + wm13*X13_f + wm14*X14_f;
+% x_f = wm0*X0_f + wm1*X1_f + wm2*X2_f + wm3*X3_f + wm4*X4_f + wm5*X5_f + wm6*X6_f + wm7*X7_f + wm8*X8_f + wm9*X9_f + wm10*X10_f + wm11*X11_f + wm12*X12_f + wm13*X13_f + wm14*X14_f;
 % x_f = X0_f;
 
-P_f = wc0*(X0_f-x_f)*(X0_f-x_f)' ...
-    + wc1*(X1_f-x_f)*(X1_f-x_f)' ...
-    + wc2*(X2_f-x_f)*(X2_f-x_f)' ...
-    + wc3*(X3_f-x_f)*(X3_f-x_f)' ...
-    + wc4*(X4_f-x_f)*(X4_f-x_f)' ...
-    + wc5*(X5_f-x_f)*(X5_f-x_f)' ...
-    + wc6*(X6_f-x_f)*(X6_f-x_f)' ...
-    + wc7*(X7_f-x_f)*(X7_f-x_f)' ...
-    + wc8*(X8_f-x_f)*(X8_f-x_f)' ...
-    + wc9*(X9_f-x_f)*(X9_f-x_f)' ...
-    + wc10*(X10_f-x_f)*(X10_f-x_f)' ...
-    + wc11*(X11_f-x_f)*(X11_f-x_f)' ...
-    + wc12*(X12_f-x_f)*(X12_f-x_f)' ...
-    + wc13*(X13_f-x_f)*(X13_f-x_f)' ...
-    + wc14*(X14_f-x_f)*(X14_f-x_f)';
+X_f = wm0*X0_f + wm1*X1_f + wm2*X2_f + wm3*X3_f + wm4*X4_f + wm5*X5_f + wm6*X6_f + wm7*X7_f + wm8*X8_f + wm9*X9_f + wm10*X10_f + wm11*X11_f + wm12*X12_f + wm13*X13_f + wm14*X14_f;
+
+% Calculate Covariance using the capitalized X_f
+P_f = wc0*(X0_f-X_f)*(X0_f-X_f)' ...
+    + wc1*(X1_f-X_f)*(X1_f-X_f)' ...
+    + wc2*(X2_f-X_f)*(X2_f-X_f)' ...
+    + wc3*(X3_f-X_f)*(X3_f-X_f)' ...
+    + wc4*(X4_f-X_f)*(X4_f-X_f)' ...
+    + wc5*(X5_f-X_f)*(X5_f-X_f)' ...
+    + wc6*(X6_f-X_f)*(X6_f-X_f)' ...
+    + wc7*(X7_f-X_f)*(X7_f-X_f)' ...
+    + wc8*(X8_f-X_f)*(X8_f-X_f)' ...
+    + wc9*(X9_f-X_f)*(X9_f-X_f)' ...
+    + wc10*(X10_f-X_f)*(X10_f-X_f)' ...
+    + wc11*(X11_f-X_f)*(X11_f-X_f)' ...
+    + wc12*(X12_f-X_f)*(X12_f-X_f)' ...
+    + wc13*(X13_f-X_f)*(X13_f-X_f)' ...
+    + wc14*(X14_f-X_f)*(X14_f-X_f)';
 
 G = eye(7);
-
 P_f = P_f + G*Q*G';
 end
 
-function [Pz, Pxz] = update_unscented_transform(X_pred, P_pred, R)
+function [z_est, Pz, Pxz] = update_unscented_transform(X_pred, P_pred, R)
 n = length(X_pred);
-alpha = 0.2;
+alpha = 1e-3;
 beta = 2;
-k = 0;
+k = 3-n;
 lambda = alpha^2 * (n + k) - n;
 
 P_pred = (P_pred + P_pred')/2;

@@ -2,18 +2,18 @@
 % motion for the rigid, constant density rod that is approximating the
 % rocket. 
 
-function [X_dot, F] = EOM(X, U)
+function [X_dot, F] = EOM(t, X, U, const)
     % Unpack State
     x=X(1); x_dot = X(2); z = X(3); z_dot = X(4);
     theta = X(5); theta_dot = X(6); m = X(7);
     
     %Unpack inputs
-    T = U(1); delta = U(2);
+    T = U.T; delta = U.delta;
     
     %constants
-    g = 9.81;
-    L = ??;
-    Isp = ??;
+    g = const.g;
+    L = const.L;
+    I_sp = const.I_sp;
     
     
     x_ddot = T/m * sin(theta+delta);
