@@ -15,7 +15,7 @@ function [X_att_est, P_att_est, theta_est] = attitude_EKF_function(X_att_prev, P
     P_pred = Phi * P_att_prev * Phi' + Q_att;
     
     %% Correction
-    K = P_pred * (P_pred + R_att)^(-1); % (assume H = eye(8)
+    K = P_pred / (P_pred + R_att); % (assume H = eye(8)
     
     % Innovation 
     y = z_att - X_pred;
@@ -57,7 +57,7 @@ function F = get_Jacobian(X, U)
    Ksi = [-q1 -q2 -q3; q0 -q3 q2; q3 q0 -q1; -q2 q1 q0];
    F = [0.5*Omega, 0.5*Ksi, zeros(4,1);
         zeros(2,8);
-        zeros(1,7), ((6*T)/m^2 * L)*sin(delta);
+        zeros(1,7), ((6*T)/(m^2 * L))*sin(delta);
         zeros(1,8)]; 
 end
 

@@ -5,7 +5,7 @@ end
 
 function [X_f, P_f] = UKF_propagation(X_0, P_0, Q, U, const)
 tf = 1 / const.sample_rate;
-num_steps = 100;
+num_steps = 2;
 t = linspace(0, tf, num_steps);
 
 % tol = 1E-12;
@@ -21,7 +21,12 @@ function [X_est, P_est] = UKF_update(X_pred, P_pred, R, z)
 
 K = Pxz/Pz;
 
-X_est = X_pred + K*(z - z_pred);
+y = z - z_pred;% Calculate raw innovation
+
+y(2) = atan2(sin(y(2)), cos(y(2))); % Wrap Radar Angle
+y(3) = atan2(sin(y(3)), cos(y(3))); % Wrap Pitch Angle
+
+X_est = X_pred + K*y;
 P_est = P_pred - K*Pz*K';
 P_est = (P_est + P_est')/2; % keep symmetry
 end
@@ -313,9 +318,11 @@ x = X(1);
 z = X(3);
 theta = X(5);
 m = X(7);
+z_safe = max(z, 0.1);
+z_angle = max(z,10);
 
-z_meas = [sqrt(x^2 + z^2);
-          -atan2(x, z) - theta;
+z_meas = [sqrt(x^2 + z_safe^2);
+          -atan2(x, z_angle) - theta;
           theta;
           m];
 end

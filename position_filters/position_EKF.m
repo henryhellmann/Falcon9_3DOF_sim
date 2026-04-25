@@ -91,9 +91,11 @@ x = X(1);
 z = X(3);
 theta = X(5);
 m = X(7);
+z_safe = max(z, 0.1);
+z_angle = max(z,10);
 
-z_meas = [sqrt(x^2 + z^2);
-          -atan2(x, z) - theta;
+z_meas = [sqrt(x^2 + z_safe^2);
+          -atan2(x, z_angle) - theta;
           theta;
           m];
 end

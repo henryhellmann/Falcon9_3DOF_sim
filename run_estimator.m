@@ -14,6 +14,8 @@ const.sample_rate = 10;
 const.g = 9.81;
 const.I_sp = 285;
 const.L = 41.2;
+const.T_max = 845000*3; %    max thrust of 3 merlin engines
+const.delta_max = deg2rad(5); % max gimbal angle
 
 tf = 10;
 % t = linspace(0, tf, tf * const.sample_rate);
@@ -57,6 +59,8 @@ P_att_est = diag([0.01^2 * ones(1,4), 0.01^2 * ones(1,3), 100^2]);
 Q_att = diag([1e-4, 1e-4, 1e-4, 1e-4, 1e-2, 1e-2, 1e-2, 1e-1]);
 R_att = diag([0.01^2 * ones(1,4), 0.05^2 * ones(1,3), 0.01^2]);
 
+
+
 for i = 1:length(t)
     U.T = interp1(t_ref, T_ref, t(i), 'linear', 'extrap');
     U.delta = interp1(t_ref, delta_ref, t(i), 'linear', 'extrap');
@@ -90,7 +94,6 @@ for i = 1:length(t)
 
     X_est_hist(i,:) = X_est;
     P_est_hist(:,:,i) = P_est;
-    fprintf('t=%.1f  theta_truth=%.4f  theta_est=%.4f\n', t(i), X_truth(i,5), theta_est);
 end
 
 %% Plotting with Correct Labels
