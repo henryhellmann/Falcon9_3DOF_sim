@@ -13,7 +13,7 @@ X0 = [500; -50; 1000; -200; deg2rad(10); 0; m0];
 Xf = [0; 0; 0; 0; 0; 0];
 
 % Discretization
-N = 100;                       
+N = 101;                       
 tf = 10.0;                     
 dt = tf / (N-1);
 
@@ -191,3 +191,6 @@ function [f, A, B, C] = get_linear_dyn(X, U, Gam, p)
     C = zeros(7,1);
     C(7,1) = -1/(p.Isp*p.g);
 end
+
+save('X_ref.mat', 'X_ref');
+save('U_ref.mat', 'U_ref');   
