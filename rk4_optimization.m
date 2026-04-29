@@ -19,11 +19,13 @@ dt = tf / (N-1);
 
 %% Reference trajectory
 X_ref = zeros(7, N);
+
 for i = 1:7
     X_ref(i,:) = linspace(X0(i), (i<=6)*Xf(min(i,6)) + (i==7)*m0*0.8, N);
 end
-U_ref   = repmat([0; m0 * p.g], 1, N); 
-Gam_ref = repmat(m0 * p.g, 1, N);      
+
+U_ref   = repmat([0; m0 * p.g], 1, N); % U_ref = [Ux, Uy]
+Gam_ref = repmat(m0 * p.g, 1, N);      % slack variable
 
 %% SCP loop
 max_iters = 10;

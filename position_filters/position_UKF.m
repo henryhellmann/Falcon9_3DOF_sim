@@ -21,7 +21,7 @@ function [X_est, P_est] = UKF_update(X_pred, P_pred, R, z)
 
 K = Pxz/Pz;
 
-y = z - z_pred;% Calculate raw innovation
+y = z - z_pred; % Calculate raw innovation
 
 y(2) = atan2(sin(y(2)), cos(y(2))); % Wrap Radar Angle
 y(3) = atan2(sin(y(3)), cos(y(3))); % Wrap Pitch Angle
